@@ -15,7 +15,12 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin:
+      process.env.FRONTEND_ORIGIN || "https://aug24pay-theta.vercel.app",
+  })
+);
 app.use(express.json());
 
 mongoose
