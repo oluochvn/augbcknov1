@@ -3,6 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
+import { rateLimit } from "express-rate-limit";
 import User from "./db/users.js";
 import { hashed, matched } from "./model/hash.js";
 import { protect } from "./middleware/auth.js";
@@ -15,6 +16,8 @@ dotenv.config();
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.use(
   cors({
     origin:
@@ -22,6 +25,16 @@ app.use(
   })
 );
 app.use(express.json());
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    message: "Too many login attempts. Please try again in 15 minutes.",
+  },
+});
 
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -77,7 +90,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.post("/login", async (req, res) => {
+app.post("/login", loginLimiter, async (req, res) => {
   const { email, password } = req.body;
 
   try {
