@@ -17,6 +17,11 @@ import mongoose from "mongoose";
         required: true,
         
     },
+    googleId: {
+  type: String,
+  unique: true,
+  sparse: true,
+},
         currency: {
       type: String,
       default: "KES",
